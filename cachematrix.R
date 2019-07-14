@@ -1,14 +1,10 @@
 ## 
 ## cachematrix.R 
 ## 
-## Two functions that are used to create a special object that 
-## stores a matrix and cache's its inverse.
+## Two functions that are used to 1) create a special object that stores
+## a matrix and cache's its inverse and 2) get the cached inverse if present
+## or calculate the inverse and store it, then return the inverse.
 ## It assumes that the matrix supplied is invertible. 
-## 
-
-## makeCacheMatrix creates a special "matrix", which is really a list 
-## containing a function to set / get the value of the matrix and to
-## get / set the value of the inverse. 
 ## 
 ## Test case: 
 ## Create an invertible matrix e.g. 
@@ -21,36 +17,41 @@
 ## amatinv - cmatinv 
 ## 
 
+
+## makeCacheMatrix creates a special "matrix", which is really a list 
+## containing functions to set and get the value of the matrix and to
+## set and get the value of the inverse of the matrix. 
+
 makeCacheMatrix <- function(x = matrix()) {
-  inv <- NULL
-  set <- function(y) {
-    x <<- y
-    inv <<- NULL
-  }
-  get <- function() x
-  set_inverse <- function(solve) inv <<- solve
-  get_inverse <- function() inv
-  list(set = set, get = get,
-       set_inverse = set_inverse,
-       get_inverse = get_inverse)
+    inv <- NULL
+    set <- function(y) {
+        x <<- y
+        inv <<- NULL
+    }
+    get <- function() x
+    setinv <- function(solve) inv <<- solve
+    getinv <- function() inv
+    list(set = set, get = get,
+         setinv = setinv,
+         getinv = getinv)
 }
 
 
 ## cachesolve calculates the inverse of the special "matrix" created with the
 ## makeCacheMatrix function defined above. It first checks whether the inverse
 ## has already been calculated. If so, it gets the inverse from the cache and
-## skips the computation. Otherwise it calculates the inverse and sets the 
-## value of the inverse in the cache via the set_inverse function. 
+## skips the computation. Otherwise it calculates the inverse and sets its  
+## value in the cache via the setinv function. 
 
 cacheSolve <- function(x, ...) {
-    inv <- x$get_inverse()
-    if(!is.null(inv)) {
-      message("getting cached data")
-      return(inv)
+    inv <- x$getinv()
+    if (!is.null(inv)) {
+        message("getting cached data")
+        return(inv)
     }
     data <- x$get()
     inv <- solve(data)
-    x$set_inverse(inv)
+    x$setinv(inv)
     inv
 }
  
